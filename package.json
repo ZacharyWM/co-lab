@@ -1,0 +1,29 @@
+{
+  "name": "co-lab",
+  "version": "1.0.0",
+  "description": "A web-based virtual workspace supporting up to 20 concurrent users with spatial audio/video zones",
+  "main": "index.ts",
+  "type": "module",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently \"bun run dev:client\" \"bun run dev:server\"",
+    "dev:client": "cd client && bun run dev",
+    "dev:server": "cd server && bun run dev",
+    "build": "bun run build:client && bun run build:server",
+    "build:client": "cd client && bun run build",
+    "build:server": "cd server && bun run build",
+    "start": "cd server && bun run start"
+  },
+  "dependencies": {
+    "webrtc-adapter": "^9.0.1",
+    "concurrently": "^8.2.2"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.0.0"
+  }
+}
