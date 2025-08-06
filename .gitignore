@@ -1,3 +1,6 @@
 pixi-js-docs/*
 
 prompt.md
+
+node_modules/
+.vscode/

@@ -17,7 +17,7 @@ TypeScript, PixiJS, and WebRTC.
 
 • Runtime: Bun (frontend & backend)
 • Frontend: React + TypeScript
-• Graphics: PixiJS for 2D virtual space
+• Graphics: PixiJS for 2D virtual space (docs at @pixi-js-docs/llms-medium.txt and pixi-js-docs/llms.txt, and can also be found at https://pixijs.download/release/docs/index.html if you really need it)
 • Communication: WebRTC for peer-to-peer audio/video
 • Backend: Bun WebSocket server for signaling
 • State Management: React Context
