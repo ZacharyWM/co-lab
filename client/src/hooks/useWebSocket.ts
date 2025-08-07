@@ -79,12 +79,18 @@ export function useWebSocket() {
   }, [currentUser, setCurrentUser, addUser, removeUser, updateUser, setConnectionStatus, clearUsers])
 
   const connect = useCallback(async () => {
+    if (signalingService.current?.isConnected()) {
+      console.log('Already connected, skipping connection attempt')
+      return
+    }
+
     if (!signalingService.current) {
       signalingService.current = new SignalingService()
       signalingService.current.addMessageHandler(handleMessage)
     }
 
     try {
+      console.log('Initiating WebSocket connection...')
       await signalingService.current.connect()
       setConnectionStatus(true)
     } catch (error) {

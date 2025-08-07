@@ -9,6 +9,7 @@ export default function Workspace() {
   const { currentUser, isConnected, connectionError, users } = useAppContext()
   const navigate = useNavigate()
   const canvasRef = useRef<HTMLDivElement>(null)
+  const hasConnected = useRef(false)
   const { pixiApp, isReady } = usePixi(canvasRef)
   const { connect, joinRoom, disconnect } = useWebSocket()
   const { currentZone } = useAvatars(pixiApp)
@@ -20,16 +21,27 @@ export default function Workspace() {
   }, [currentUser, navigate])
 
   useEffect(() => {
-    if (currentUser && isReady) {
+    let shouldConnect = currentUser && isReady && !hasConnected.current
+
+    if (shouldConnect) {
+      hasConnected.current = true
       connect().then(() => {
         joinRoom(currentUser.name)
+      }).catch(error => {
+        hasConnected.current = false // Reset on error
       })
     }
 
     return () => {
       disconnect()
     }
-  }, [currentUser, isReady, connect, joinRoom, disconnect])
+  }, [currentUser, isReady])
+  
+  useEffect(() => {
+    return () => {
+      hasConnected.current = false // Reset when component unmounts
+    }
+  }, [])
 
   const handleLeave = () => {
     disconnect()

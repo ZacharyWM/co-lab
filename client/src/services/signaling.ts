@@ -7,25 +7,41 @@ export class SignalingService {
   private messageHandlers: Set<MessageHandler> = new Set()
   private reconnectAttempts = 0
   private maxReconnectAttempts = 5
-  private reconnectDelay = 1000
   private isConnecting = false
   private shouldReconnect = true
+  private reconnectTimeoutId: NodeJS.Timeout | null = null
+  private connectionTimeoutId: NodeJS.Timeout | null = null
 
   constructor(private url: string = 'ws://localhost:3001') {}
 
   connect(): Promise<void> {
     if (this.isConnecting || (this.ws && this.ws.readyState === WebSocket.OPEN)) {
+      console.log('Already connected or connecting, skipping connection attempt')
       return Promise.resolve()
     }
 
     this.isConnecting = true
+    console.log(`Attempting to connect to WebSocket server at ${this.url}`)
     
     return new Promise((resolve, reject) => {
       try {
         this.ws = new WebSocket(this.url)
 
+        this.connectionTimeoutId = setTimeout(() => {
+          if (this.ws && this.ws.readyState === WebSocket.CONNECTING) {
+            console.error('WebSocket connection timeout')
+            this.ws.close()
+            this.isConnecting = false
+            reject(new Error('Connection timeout'))
+          }
+        }, 5000)
+
         this.ws.onopen = () => {
-          console.log('WebSocket connected')
+          if (this.connectionTimeoutId) {
+            clearTimeout(this.connectionTimeoutId)
+            this.connectionTimeoutId = null
+          }
+          console.log('WebSocket connected successfully')
           this.isConnecting = false
           this.reconnectAttempts = 0
           resolve()
@@ -41,6 +57,10 @@ export class SignalingService {
         }
 
         this.ws.onclose = (event) => {
+          if (this.connectionTimeoutId) {
+            clearTimeout(this.connectionTimeoutId)
+            this.connectionTimeoutId = null
+          }
           console.log('WebSocket closed:', event.code, event.reason)
           this.isConnecting = false
           this.ws = null
@@ -51,6 +71,10 @@ export class SignalingService {
         }
 
         this.ws.onerror = (error) => {
+          if (this.connectionTimeoutId) {
+            clearTimeout(this.connectionTimeoutId)
+            this.connectionTimeoutId = null
+          }
           console.error('WebSocket error:', error)
           this.isConnecting = false
           
@@ -60,6 +84,7 @@ export class SignalingService {
         }
       } catch (error) {
         this.isConnecting = false
+        console.error('Failed to create WebSocket:', error)
         reject(error)
       }
     })
@@ -67,6 +92,16 @@ export class SignalingService {
 
   disconnect() {
     this.shouldReconnect = false
+    
+    if (this.reconnectTimeoutId) {
+      clearTimeout(this.reconnectTimeoutId)
+      this.reconnectTimeoutId = null
+    }
+    if (this.connectionTimeoutId) {
+      clearTimeout(this.connectionTimeoutId)
+      this.connectionTimeoutId = null
+    }
+    
     if (this.ws) {
       this.ws.close()
       this.ws = null
@@ -94,13 +129,20 @@ export class SignalingService {
   }
 
   private scheduleReconnect() {
+    if (this.reconnectTimeoutId) {
+      clearTimeout(this.reconnectTimeoutId)
+    }
+
     this.reconnectAttempts++
-    const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1)
+    const baseDelay = 1000
+    const delay = baseDelay * Math.pow(2, Math.min(this.reconnectAttempts - 1, 4))
     
-    console.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`)
+    console.log(`Scheduling reconnection in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`)
     
-    setTimeout(() => {
-      if (this.shouldReconnect) {
+    this.reconnectTimeoutId = setTimeout(() => {
+      this.reconnectTimeoutId = null
+      if (this.shouldReconnect && this.reconnectAttempts <= this.maxReconnectAttempts) {
+        console.log(`Executing reconnection attempt ${this.reconnectAttempts}`)
         this.connect().catch(error => {
           console.error('Reconnection failed:', error)
         })

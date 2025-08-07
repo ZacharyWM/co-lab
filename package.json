@@ -10,13 +10,14 @@
     "server"
   ],
   "scripts": {
-    "dev": "concurrently \"bun run dev:client\" \"bun run dev:server\"",
+    "dev": "concurrently -n \"server,client\" -c \"blue,green\" \"bun run dev:server\" \"sleep 2 && bun run dev:client\"",
     "dev:client": "cd client && bun run dev",
     "dev:server": "cd server && bun run dev",
     "build": "bun run build:client && bun run build:server",
     "build:client": "cd client && bun run build",
     "build:server": "cd server && bun run build",
-    "start": "cd server && bun run start"
+    "start": "cd server && bun run start",
+    "install:all": "bun install && cd client && bun install && cd ../server && bun install"
   },
   "dependencies": {
     "webrtc-adapter": "^9.0.1",
