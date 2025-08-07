@@ -1,15 +1,17 @@
 import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppContext } from '../hooks/useAppContext'
-import { usePixi } from '../hooks/usePixi'
+import { usePixi, ZONES } from '../hooks/usePixi'
 import { useWebSocket } from '../hooks/useWebSocket'
+import { useAvatars } from '../hooks/useAvatars'
 
 export default function Workspace() {
-  const { currentUser, isConnected, connectionError } = useAppContext()
+  const { currentUser, isConnected, connectionError, users } = useAppContext()
   const navigate = useNavigate()
   const canvasRef = useRef<HTMLDivElement>(null)
   const { pixiApp, isReady } = usePixi(canvasRef)
   const { connect, joinRoom, disconnect } = useWebSocket()
+  const { currentZone } = useAvatars(pixiApp)
 
   useEffect(() => {
     if (!currentUser) {
@@ -61,6 +63,14 @@ export default function Workspace() {
           <div className={`text-xs ${isConnected ? 'text-green-600' : 'text-red-600'}`}>
             {isConnected ? '● Connected' : '● Disconnected'}
           </div>
+          <div className="text-xs text-gray-600 mt-1">
+            Users: {users.size + (currentUser ? 1 : 0)}/20
+          </div>
+          {currentZone && (
+            <div className="text-xs text-green-600 mt-1">
+              📍 {ZONES.find(z => z.id === currentZone)?.name || currentZone}
+            </div>
+          )}
           {connectionError && (
             <div className="text-xs text-red-600 mt-1">{connectionError}</div>
           )}
