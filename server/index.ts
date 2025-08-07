@@ -1,28 +1,28 @@
-import { serve } from "bun";
-import { WebSocketServer } from 'ws';
+import { WebSocketHandler } from './websocket';
 
-const port = process.env.PORT || 3001;
+const handler = new WebSocketHandler();
 
-const server = serve({
-  port,
-  fetch(request, server) {
-    if (server.upgrade(request)) {
-      return; // do not return a Response
+const server = Bun.serve({
+  port: 3001,
+  fetch(req, server) {
+    const success = server.upgrade(req);
+    if (success) {
+      return undefined;
     }
-    return new Response("Hello World");
+
+    return new Response("WebSocket upgrade failed", { status: 400 });
   },
   websocket: {
     message(ws, message) {
-      console.log('Received message:', message);
-      ws.send(`Echo: ${message}`);
+      handler.handleMessage(ws, message.toString());
     },
     open(ws) {
-      console.log('WebSocket connection opened');
+      handler.handleConnection(ws);
     },
-    close(ws, code, message) {
-      console.log('WebSocket connection closed');
+    close(ws) {
+      handler.handleDisconnection(ws);
     },
   },
 });
 
-console.log(`WebSocket server listening on port ${port}`);
+console.log(`WebSocket server listening on port ${server.port}`);
