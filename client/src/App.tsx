@@ -1,20 +1,18 @@
-import { useState } from 'react'
+import { Routes, Route } from 'react-router-dom'
+import NameEntry from './components/NameEntry'
+import Workspace from './components/Workspace'
+import { AppProvider } from './hooks/useAppContext'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <div className="App">
-      <h1>Co-Lab Virtual Workspace</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+    <AppProvider>
+      <div className="min-h-screen bg-gray-100">
+        <Routes>
+          <Route path="/" element={<NameEntry />} />
+          <Route path="/workspace" element={<Workspace />} />
+        </Routes>
       </div>
-    </div>
+    </AppProvider>
   )
 }
 
