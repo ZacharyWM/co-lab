@@ -14,6 +14,15 @@ export function useWebSocket() {
     setConnectionStatus,
     clearUsers 
   } = useAppContext()
+  
+  // Store the latest values in refs to avoid stale closures
+  const handleMessageRef = useRef<(message: WebSocketMessage) => void>()
+  const setConnectionStatusRef = useRef(setConnectionStatus)
+  const clearUsersRef = useRef(clearUsers)
+  
+  // Update refs when values change
+  setConnectionStatusRef.current = setConnectionStatus
+  clearUsersRef.current = clearUsers
 
   const handleMessage = useCallback((message: WebSocketMessage) => {
     switch (message.type) {
@@ -78,6 +87,9 @@ export function useWebSocket() {
     }
   }, [currentUser, setCurrentUser, addUser, removeUser, updateUser, setConnectionStatus, clearUsers])
 
+  // Update the ref with the latest handleMessage
+  handleMessageRef.current = handleMessage
+
   const connect = useCallback(async () => {
     if (signalingService.current?.isConnected()) {
       console.log('Already connected, skipping connection attempt')
@@ -86,27 +98,29 @@ export function useWebSocket() {
 
     if (!signalingService.current) {
       signalingService.current = new SignalingService()
-      signalingService.current.addMessageHandler(handleMessage)
+      if (handleMessageRef.current) {
+        signalingService.current.addMessageHandler(handleMessageRef.current)
+      }
     }
 
     try {
       console.log('Initiating WebSocket connection...')
       await signalingService.current.connect()
-      setConnectionStatus(true)
+      setConnectionStatusRef.current(true)
     } catch (error) {
       console.error('Failed to connect to server:', error)
-      setConnectionStatus(false, 'Failed to connect to server')
+      setConnectionStatusRef.current(false, 'Failed to connect to server')
     }
-  }, [handleMessage, setConnectionStatus])
+  }, [])
 
   const disconnect = useCallback(() => {
     if (signalingService.current) {
       signalingService.current.disconnect()
       signalingService.current = null
-      setConnectionStatus(false)
-      clearUsers()
+      setConnectionStatusRef.current(false)
+      clearUsersRef.current()
     }
-  }, [setConnectionStatus, clearUsers])
+  }, [])
 
   const joinRoom = useCallback((name: string) => {
     if (signalingService.current) {
