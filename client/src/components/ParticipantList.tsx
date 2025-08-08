@@ -11,7 +11,10 @@ export default function ParticipantList({
 
   const list = useMemo(() => {
     if (!currentZone) return [] as { id: string; name: string }[];
-    const items: { id: string; name: string }[] = [];
+    const self = currentUser
+      ? [{ id: currentUser.id, name: currentUser.name }]
+      : [];
+    const others: { id: string; name: string }[] = [];
 
     // Allow matching by zone id or display name for robustness
     const zone = ZONES.find(
@@ -22,9 +25,6 @@ export default function ParticipantList({
       ...(zone ? [zone.name, zone.id] : []),
     ]);
 
-    if (currentUser) {
-      items.push({ id: currentUser.id, name: currentUser.name });
-    }
     users.forEach((u, id) => {
       if (id === currentUser?.id) return;
       const theirZone =
@@ -32,10 +32,11 @@ export default function ParticipantList({
         getZoneAtPoint(u.x, u.y)?.id ??
         getZoneAtPoint(u.x, u.y)?.name;
       if (theirZone && acceptable.has(theirZone)) {
-        items.push({ id, name: u.name });
+        others.push({ id, name: u.name });
       }
     });
-    return items;
+    others.sort((a, b) => a.name.localeCompare(b.name));
+    return [...self, ...others];
   }, [currentZone, users, currentUser]);
 
   return (
