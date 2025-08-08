@@ -7,6 +7,7 @@ import { useAvatars } from "../hooks/useAvatars";
 import VideoGrid from "./VideoGrid";
 import Controls from "./Controls";
 import { useWebRTC } from "../hooks/useWebRTC";
+import ParticipantList from "./ParticipantList";
 
 export default function Workspace() {
   const { currentUser, isConnected, connectionError, users } = useAppContext();
@@ -101,6 +102,7 @@ export default function Workspace() {
               📍 {ZONES.find((z) => z.id === currentZone)?.name || currentZone}
             </div>
           )}
+          <ParticipantList currentZone={currentZone} />
           {connectionError && (
             <div className="text-xs text-red-600 mt-1">{connectionError}</div>
           )}
