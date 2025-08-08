@@ -4,6 +4,9 @@ import { useAppContext } from "../hooks/useAppContext";
 import { usePixi, ZONES } from "../hooks/usePixi";
 import { useWebSocket } from "../hooks/useWebSocket";
 import { useAvatars } from "../hooks/useAvatars";
+import VideoGrid from "./VideoGrid";
+import Controls from "./Controls";
+import { useWebRTC } from "../hooks/useWebRTC";
 
 export default function Workspace() {
   const { currentUser, isConnected, connectionError, users } = useAppContext();
@@ -13,6 +16,16 @@ export default function Workspace() {
   const { pixiApp, isReady } = usePixi(canvasRef);
   const { connect, joinRoom, disconnect } = useWebSocket();
   const { currentZone } = useAvatars(pixiApp);
+
+  const {
+    localStream,
+    remoteStreams,
+    audioEnabled,
+    videoEnabled,
+    error: mediaError,
+    toggleAudio,
+    toggleVideo,
+  } = useWebRTC(currentZone);
 
   useEffect(() => {
     if (!currentUser) {
@@ -91,6 +104,11 @@ export default function Workspace() {
           {connectionError && (
             <div className="text-xs text-red-600 mt-1">{connectionError}</div>
           )}
+          {mediaError && (
+            <div className="text-xs text-red-600 mt-1">
+              Media error: {mediaError}
+            </div>
+          )}
         </div>
       </div>
 
@@ -100,6 +118,19 @@ export default function Workspace() {
           <div>• Use WASD or arrow keys to move</div>
           <div>• Enter green zones to communicate</div>
           <div>• Audio/video will activate in zones</div>
+        </div>
+      </div>
+
+      {/* A/V Controls & Video Grid */}
+      <div className="absolute bottom-4 right-4 z-10 bg-white rounded-lg p-3 shadow-lg">
+        <Controls
+          audioEnabled={audioEnabled}
+          videoEnabled={videoEnabled}
+          onToggleAudio={toggleAudio}
+          onToggleVideo={toggleVideo}
+        />
+        <div className="mt-3">
+          <VideoGrid localStream={localStream} remoteStreams={remoteStreams} />
         </div>
       </div>
 

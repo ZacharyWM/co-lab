@@ -3,6 +3,22 @@ import { SignalingService } from "../services/signaling";
 import { useAppContext } from "./useAppContext";
 import { WebSocketMessage, User } from "../types";
 
+// Simple pub/sub for external listeners (e.g., WebRTC)
+type Listener = (message: WebSocketMessage) => void;
+const listeners = new Map<string, Set<Listener>>();
+
+function notify(type: string, message: WebSocketMessage) {
+  const set = listeners.get(type);
+  if (!set) return;
+  for (const cb of set) {
+    try {
+      cb(message);
+    } catch (e) {
+      console.error("Listener error", e);
+    }
+  }
+}
+
 export function useWebSocket() {
   const signalingService = useRef<SignalingService | null>(null);
   const {
@@ -46,6 +62,8 @@ export function useWebSocket() {
               }
             });
           }
+          // Notify listeners (e.g., WebRTC) so they can reconcile peers
+          notify("joined", message);
           break;
 
         case "user-joined":
@@ -58,6 +76,7 @@ export function useWebSocket() {
           if (message.data.userId) {
             removeUser(message.data.userId);
           }
+          notify("user-left", message);
           break;
 
         case "position-update":
@@ -79,6 +98,7 @@ export function useWebSocket() {
                   : undefined,
             });
           }
+          notify(message.type, message);
           break;
 
         case "error":
@@ -87,6 +107,9 @@ export function useWebSocket() {
           break;
 
         default:
+          // pass through to external listeners (e.g., offer/answer/ice)
+          notify(message.type, message);
+          // still log for visibility
           console.log("Unhandled message type:", message.type);
       }
     },
@@ -150,6 +173,28 @@ export function useWebSocket() {
     }
   }, []);
 
+  const send = useCallback((type: string, data: any) => {
+    if (signalingService.current) {
+      signalingService.current.send({ type, data });
+    }
+  }, []);
+
+  const on = useCallback((type: string, cb: Listener) => {
+    let set = listeners.get(type);
+    if (!set) {
+      set = new Set();
+      listeners.set(type, set);
+    }
+    set.add(cb);
+  }, []);
+
+  const off = useCallback((type: string, cb: Listener) => {
+    const set = listeners.get(type);
+    if (!set) return;
+    set.delete(cb);
+    if (set.size === 0) listeners.delete(type);
+  }, []);
+
   const joinRoom = useCallback((name: string) => {
     if (signalingService.current) {
       signalingService.current.joinRoom(name);
@@ -194,6 +239,9 @@ export function useWebSocket() {
     sendPosition,
     sendZoneEnter,
     sendZoneExit,
+    send,
+    on,
+    off,
     isConnected: signalingService.current?.isConnected() || false,
     signalingService: signalingService.current,
   };
