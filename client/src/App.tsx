@@ -1,7 +1,8 @@
-import { Routes, Route } from 'react-router-dom'
-import NameEntry from './components/NameEntry'
-import Workspace from './components/Workspace'
-import { AppProvider } from './hooks/useAppContext'
+import { Routes, Route } from 'react-router-dom';
+
+import NameEntry from './components/NameEntry';
+import Workspace from './components/Workspace';
+import { AppProvider } from './hooks/useAppContext';
 
 function App() {
   return (
@@ -13,7 +14,7 @@ function App() {
         </Routes>
       </div>
     </AppProvider>
-  )
+  );
 }
 
-export default App
+export default App;

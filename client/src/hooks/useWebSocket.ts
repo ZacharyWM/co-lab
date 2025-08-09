@@ -1,7 +1,9 @@
-import { useEffect, useRef, useCallback } from "react";
-import { SignalingService } from "../services/signaling";
-import { useAppContext } from "./useAppContext";
-import { WebSocketMessage, User } from "../types";
+import { useEffect, useRef, useCallback } from 'react';
+
+import { SignalingService } from '../services/signaling';
+import { WebSocketMessage, User } from '../types';
+
+import { useAppContext } from './useAppContext';
 
 // Simple pub/sub for external listeners (e.g., WebRTC)
 type Listener = (message: WebSocketMessage) => void;
@@ -14,7 +16,7 @@ function notify(type: string, message: WebSocketMessage) {
     try {
       cb(message);
     } catch (e) {
-      console.error("Listener error", e);
+      console.error('Listener error', e);
     }
   }
 }
@@ -43,7 +45,7 @@ export function useWebSocket() {
   const handleMessage = useCallback(
     (message: WebSocketMessage) => {
       switch (message.type) {
-        case "connection":
+        case 'connection':
           if (currentUser && message.data.userId) {
             setCurrentUser({
               ...currentUser,
@@ -52,7 +54,7 @@ export function useWebSocket() {
           }
           break;
 
-        case "joined":
+        case 'joined':
           setConnectionStatus(true);
           if (message.data.users) {
             clearUsers();
@@ -63,23 +65,23 @@ export function useWebSocket() {
             });
           }
           // Notify listeners (e.g., WebRTC) so they can reconcile peers
-          notify("joined", message);
+          notify('joined', message);
           break;
 
-        case "user-joined":
+        case 'user-joined':
           if (message.data && message.data.id !== currentUser?.id) {
             addUser(message.data);
           }
           break;
 
-        case "user-left":
+        case 'user-left':
           if (message.data.userId) {
             removeUser(message.data.userId);
           }
-          notify("user-left", message);
+          notify('user-left', message);
           break;
 
-        case "position-update":
+        case 'position-update':
           if (message.data.userId && message.data.userId !== currentUser?.id) {
             updateUser(message.data.userId, {
               x: message.data.x,
@@ -88,12 +90,12 @@ export function useWebSocket() {
           }
           break;
 
-        case "zone-enter":
-        case "zone-exit":
+        case 'zone-enter':
+        case 'zone-exit':
           if (message.data.userId && message.data.userId !== currentUser?.id) {
             updateUser(message.data.userId, {
               zone:
-                message.type === "zone-enter"
+                message.type === 'zone-enter'
                   ? message.data.zoneName
                   : undefined,
             });
@@ -101,8 +103,8 @@ export function useWebSocket() {
           notify(message.type, message);
           break;
 
-        case "error":
-          console.error("Server error:", message.data.message);
+        case 'error':
+          console.error('Server error:', message.data.message);
           setConnectionStatus(false, message.data.message);
           break;
 
@@ -110,7 +112,7 @@ export function useWebSocket() {
           // pass through to external listeners (e.g., offer/answer/ice)
           notify(message.type, message);
           // still log for visibility
-          console.log("Unhandled message type:", message.type);
+          console.log('Unhandled message type:', message.type);
       }
     },
     [
@@ -132,18 +134,18 @@ export function useWebSocket() {
     const handler = (e: Event) => {
       const { x, y } =
         (e as CustomEvent<{ x: number; y: number }>).detail || {};
-      if (typeof x === "number" && typeof y === "number") {
+      if (typeof x === 'number' && typeof y === 'number') {
         signalingService.current?.sendPosition(x, y);
       }
     };
-    window.addEventListener("local:position", handler as EventListener);
+    window.addEventListener('local:position', handler as EventListener);
     return () =>
-      window.removeEventListener("local:position", handler as EventListener);
+      window.removeEventListener('local:position', handler as EventListener);
   }, []);
 
   const connect = useCallback(async () => {
     if (signalingService.current?.isConnected()) {
-      console.log("Already connected, skipping connection attempt");
+      console.log('Already connected, skipping connection attempt');
       return;
     }
 
@@ -155,12 +157,12 @@ export function useWebSocket() {
     }
 
     try {
-      console.log("Initiating WebSocket connection...");
+      console.log('Initiating WebSocket connection...');
       await signalingService.current.connect();
       setConnectionStatusRef.current(true);
     } catch (error) {
-      console.error("Failed to connect to server:", error);
-      setConnectionStatusRef.current(false, "Failed to connect to server");
+      console.error('Failed to connect to server:', error);
+      setConnectionStatusRef.current(false, 'Failed to connect to server');
     }
   }, []);
 

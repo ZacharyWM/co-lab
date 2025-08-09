@@ -1,5 +1,6 @@
-import { createContext, useContext, useReducer, ReactNode } from "react";
-import { AppState, User } from "../types";
+import { createContext, useContext, useReducer, ReactNode } from 'react';
+
+import { AppState, User } from '../types';
 
 interface AppContextType extends AppState {
   setCurrentUser: (user: User) => void;
@@ -11,15 +12,15 @@ interface AppContextType extends AppState {
 }
 
 type AppAction =
-  | { type: "SET_CURRENT_USER"; payload: User }
-  | { type: "ADD_USER"; payload: User }
-  | { type: "REMOVE_USER"; payload: string }
-  | { type: "UPDATE_USER"; payload: { userId: string; updates: Partial<User> } }
+  | { type: 'SET_CURRENT_USER'; payload: User }
+  | { type: 'ADD_USER'; payload: User }
+  | { type: 'REMOVE_USER'; payload: string }
+  | { type: 'UPDATE_USER'; payload: { userId: string; updates: Partial<User> } }
   | {
-      type: "SET_CONNECTION_STATUS";
+      type: 'SET_CONNECTION_STATUS';
       payload: { isConnected: boolean; error?: string };
     }
-  | { type: "CLEAR_USERS" };
+  | { type: 'CLEAR_USERS' };
 
 const initialState: AppState = {
   currentUser: null,
@@ -30,13 +31,13 @@ const initialState: AppState = {
 
 function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
-    case "SET_CURRENT_USER":
+    case 'SET_CURRENT_USER':
       return {
         ...state,
         currentUser: action.payload,
       };
 
-    case "ADD_USER": {
+    case 'ADD_USER': {
       const newUsers = new Map(state.users);
       newUsers.set(action.payload.id, action.payload);
       return {
@@ -45,7 +46,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
       };
     }
 
-    case "REMOVE_USER": {
+    case 'REMOVE_USER': {
       const updatedUsers = new Map(state.users);
       updatedUsers.delete(action.payload);
       return {
@@ -54,7 +55,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
       };
     }
 
-    case "UPDATE_USER": {
+    case 'UPDATE_USER': {
       const usersToUpdate = new Map(state.users);
       const existingUser = usersToUpdate.get(action.payload.userId);
       if (existingUser) {
@@ -69,14 +70,14 @@ function appReducer(state: AppState, action: AppAction): AppState {
       };
     }
 
-    case "SET_CONNECTION_STATUS":
+    case 'SET_CONNECTION_STATUS':
       return {
         ...state,
         isConnected: action.payload.isConnected,
         connectionError: action.payload.error || null,
       };
 
-    case "CLEAR_USERS":
+    case 'CLEAR_USERS':
       return {
         ...state,
         users: new Map(),
@@ -93,30 +94,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
   const setCurrentUser = (user: User) => {
-    dispatch({ type: "SET_CURRENT_USER", payload: user });
+    dispatch({ type: 'SET_CURRENT_USER', payload: user });
   };
 
   const addUser = (user: User) => {
-    dispatch({ type: "ADD_USER", payload: user });
+    dispatch({ type: 'ADD_USER', payload: user });
   };
 
   const removeUser = (userId: string) => {
-    dispatch({ type: "REMOVE_USER", payload: userId });
+    dispatch({ type: 'REMOVE_USER', payload: userId });
   };
 
   const updateUser = (userId: string, updates: Partial<User>) => {
-    dispatch({ type: "UPDATE_USER", payload: { userId, updates } });
+    dispatch({ type: 'UPDATE_USER', payload: { userId, updates } });
   };
 
   const setConnectionStatus = (isConnected: boolean, error?: string) => {
     dispatch({
-      type: "SET_CONNECTION_STATUS",
+      type: 'SET_CONNECTION_STATUS',
       payload: { isConnected, error },
     });
   };
 
   const clearUsers = () => {
-    dispatch({ type: "CLEAR_USERS" });
+    dispatch({ type: 'CLEAR_USERS' });
   };
 
   const contextValue: AppContextType = {
@@ -137,7 +138,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 export function useAppContext(): AppContextType {
   const context = useContext(AppContext);
   if (!context) {
-    throw new Error("useAppContext must be used within an AppProvider");
+    throw new Error('useAppContext must be used within an AppProvider');
   }
   return context;
 }

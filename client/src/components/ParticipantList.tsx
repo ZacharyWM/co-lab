@@ -1,6 +1,7 @@
-import { useMemo } from "react";
-import { useAppContext } from "../hooks/useAppContext";
-import { ZONES, getZoneAtPoint } from "../hooks/usePixi";
+import { useMemo } from 'react';
+
+import { useAppContext } from '../hooks/useAppContext';
+import { ZONES, getZoneAtPoint } from '../hooks/usePixi';
 
 export default function ParticipantList({
   currentZone,

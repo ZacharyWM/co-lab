@@ -1,9 +1,11 @@
-import { useEffect, useRef, useCallback } from "react";
-import { useAppContext } from "./useAppContext";
-import { useWebSocket } from "./useWebSocket";
-import { useMovement } from "./useMovement";
-import { PixiApp, getZoneAtPoint } from "./usePixi";
-import Avatar from "../components/Avatar";
+import { useEffect, useRef, useCallback } from 'react';
+
+import Avatar from '../components/Avatar';
+
+import { useAppContext } from './useAppContext';
+import { useMovement } from './useMovement';
+import { PixiApp, getZoneAtPoint } from './usePixi';
+import { useWebSocket } from './useWebSocket';
 // import { User } from "../types";
 
 export function useAvatars(pixiApp: PixiApp | null) {
@@ -66,7 +68,7 @@ export function useAvatars(pixiApp: PixiApp | null) {
 
   // Create or update local avatar
   useEffect(() => {
-    if (!pixiApp || !currentUser || currentUser.id === "") return;
+    if (!pixiApp || !currentUser || currentUser.id === '') return;
 
     if (!localAvatarRef.current) {
       localAvatarRef.current = new Avatar(currentUser, true);

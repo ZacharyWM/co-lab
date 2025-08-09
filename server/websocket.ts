@@ -1,12 +1,13 @@
-import { ServerWebSocket } from "bun";
-import { RoomManager } from "./room";
+import { ServerWebSocket } from 'bun';
+
+import { RoomManager } from './room';
 import {
   WebSocketMessage,
   JoinMessage,
   PositionMessage,
   WebRTCMessage,
   ZoneMessage,
-} from "./types";
+} from './types';
 
 export class WebSocketHandler {
   private roomManager: RoomManager;
@@ -23,7 +24,7 @@ export class WebSocketHandler {
 
     ws.send(
       JSON.stringify({
-        type: "connection",
+        type: 'connection',
         data: { userId },
       })
     );
@@ -35,35 +36,35 @@ export class WebSocketHandler {
       const userId = ws.data.userId;
 
       if (!this.isValidMessage(parsedMessage)) {
-        this.sendError(ws, "Invalid message format");
+        this.sendError(ws, 'Invalid message format');
         return;
       }
 
       switch (parsedMessage.type) {
-        case "join":
+        case 'join':
           this.handleJoin(ws, userId, parsedMessage.data as JoinMessage);
           break;
-        case "leave":
+        case 'leave':
           this.handleLeave(userId);
           break;
-        case "position":
+        case 'position':
           this.handlePosition(userId, parsedMessage.data as PositionMessage);
           break;
-        case "offer":
-        case "answer":
-        case "ice-candidate":
+        case 'offer':
+        case 'answer':
+        case 'ice-candidate':
           this.handleWebRTC(userId, parsedMessage);
           break;
-        case "zone-enter":
-        case "zone-exit":
+        case 'zone-enter':
+        case 'zone-exit':
           this.handleZoneChange(userId, parsedMessage);
           break;
         default:
-          this.sendError(ws, "Unknown message type");
+          this.sendError(ws, 'Unknown message type');
       }
     } catch (error) {
-      console.log("Error parsing message:", error);
-      this.sendError(ws, "Failed to parse message");
+      console.log('Error parsing message:', error);
+      this.sendError(ws, 'Failed to parse message');
     }
   }
 
@@ -82,14 +83,14 @@ export class WebSocketHandler {
   ) {
     if (
       !data.name ||
-      typeof data.name !== "string" ||
+      typeof data.name !== 'string' ||
       !this.isValidName(data.name)
     ) {
-      this.sendError(ws, "Invalid name");
+      this.sendError(ws, 'Invalid name');
       return;
     }
 
-    const roomId = "main"; // For now, everyone joins the main room
+    const roomId = 'main'; // For now, everyone joins the main room
     const user = {
       id: userId,
       name: data.name.trim(),
@@ -99,14 +100,14 @@ export class WebSocketHandler {
 
     const success = this.roomManager.addUserToRoom(roomId, user);
     if (!success) {
-      this.sendError(ws, "Room is full");
+      this.sendError(ws, 'Room is full');
       return;
     }
 
     // Send success response to joining user
     ws.send(
       JSON.stringify({
-        type: "joined",
+        type: 'joined',
         data: {
           userId,
           room: roomId,
@@ -119,7 +120,7 @@ export class WebSocketHandler {
     this.broadcastToRoom(
       roomId,
       {
-        type: "user-joined",
+        type: 'user-joined',
         data: user,
       },
       userId
@@ -129,16 +130,16 @@ export class WebSocketHandler {
   private handleLeave(userId: string) {
     const user = this.roomManager.removeUserFromRoom(userId);
     if (user) {
-      const roomId = "main";
+      const roomId = 'main';
       this.broadcastToRoom(roomId, {
-        type: "user-left",
+        type: 'user-left',
         data: { userId },
       });
     }
   }
 
   private handlePosition(userId: string, data: PositionMessage) {
-    if (typeof data.x !== "number" || typeof data.y !== "number") {
+    if (typeof data.x !== 'number' || typeof data.y !== 'number') {
       return;
     }
 
@@ -149,7 +150,7 @@ export class WebSocketHandler {
         this.broadcastToRoom(
           roomId,
           {
-            type: "position-update",
+            type: 'position-update',
             data: {
               userId,
               x: data.x,
@@ -184,7 +185,7 @@ export class WebSocketHandler {
 
   private handleZoneChange(userId: string, message: WebSocketMessage) {
     const data = message.data as ZoneMessage;
-    if (!data.zoneName || typeof data.zoneName !== "string") {
+    if (!data.zoneName || typeof data.zoneName !== 'string') {
       return;
     }
 
@@ -226,7 +227,7 @@ export class WebSocketHandler {
   private sendError(ws: ServerWebSocket<any>, error: string) {
     ws.send(
       JSON.stringify({
-        type: "error",
+        type: 'error',
         data: { message: error },
       })
     );
@@ -238,7 +239,7 @@ export class WebSocketHandler {
 
   private isValidMessage(message: any): message is WebSocketMessage {
     return (
-      message && typeof message.type === "string" && message.data !== undefined
+      message && typeof message.type === 'string' && message.data !== undefined
     );
   }
 

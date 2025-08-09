@@ -1,10 +1,11 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAppContext } from "../hooks/useAppContext";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { useAppContext } from '../hooks/useAppContext';
 
 export default function NameEntry() {
-  const [name, setName] = useState("");
-  const [error, setError] = useState("");
+  const [name, setName] = useState('');
+  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { setCurrentUser } = useAppContext();
@@ -13,15 +14,15 @@ export default function NameEntry() {
     const trimmedName = name.trim();
 
     if (!trimmedName) {
-      return "Name is required";
+      return 'Name is required';
     }
 
     if (trimmedName.length > 20) {
-      return "Name must be 20 characters or less";
+      return 'Name must be 20 characters or less';
     }
 
     if (!/^[a-zA-Z0-9\s]+$/.test(trimmedName)) {
-      return "Name can only contain letters, numbers, and spaces";
+      return 'Name can only contain letters, numbers, and spaces';
     }
 
     return null;
@@ -37,21 +38,21 @@ export default function NameEntry() {
     }
 
     setIsLoading(true);
-    setError("");
+    setError('');
 
     try {
       const trimmedName = name.trim();
       setCurrentUser({
-        id: "",
+        id: '',
         name: trimmedName,
         x: 100,
         y: 100,
       });
 
-      navigate("/workspace");
+      navigate('/workspace');
     } catch (err) {
-      console.error("Error entering workspace:", err);
-      setError("Failed to enter workspace. Please try again.");
+      console.error('Error entering workspace:', err);
+      setError('Failed to enter workspace. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -81,7 +82,7 @@ export default function NameEntry() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors ${
-                error ? "border-red-300 bg-red-50" : "border-gray-300"
+                error ? 'border-red-300 bg-red-50' : 'border-gray-300'
               }`}
               placeholder="Enter your name..."
               maxLength={20}
@@ -98,7 +99,7 @@ export default function NameEntry() {
             disabled={isLoading || !name.trim()}
             className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {isLoading ? "Entering Workspace..." : "Enter Workspace"}
+            {isLoading ? 'Entering Workspace...' : 'Enter Workspace'}
           </button>
         </form>
 

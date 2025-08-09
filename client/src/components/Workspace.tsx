@@ -1,13 +1,15 @@
-import { useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAppContext } from "../hooks/useAppContext";
-import { usePixi, ZONES } from "../hooks/usePixi";
-import { useWebSocket } from "../hooks/useWebSocket";
-import { useAvatars } from "../hooks/useAvatars";
-import VideoGrid from "./VideoGrid";
-import Controls from "./Controls";
-import { useWebRTC } from "../hooks/useWebRTC";
-import ParticipantList from "./ParticipantList";
+import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { useAppContext } from '../hooks/useAppContext';
+import { useAvatars } from '../hooks/useAvatars';
+import { usePixi, ZONES } from '../hooks/usePixi';
+import { useWebRTC } from '../hooks/useWebRTC';
+import { useWebSocket } from '../hooks/useWebSocket';
+
+import Controls from './Controls';
+import ParticipantList from './ParticipantList';
+import VideoGrid from './VideoGrid';
 
 export default function Workspace() {
   const { currentUser, isConnected, connectionError, users } = useAppContext();
@@ -30,7 +32,7 @@ export default function Workspace() {
 
   useEffect(() => {
     if (!currentUser) {
-      navigate("/");
+      navigate('/');
     }
   }, [currentUser, navigate]);
 
@@ -46,7 +48,7 @@ export default function Workspace() {
         joinRoom(currentUser.name);
       })
       .catch((error) => {
-        console.error("Failed to connect to WebSocket:", error);
+        console.error('Failed to connect to WebSocket:', error);
         hasConnectedRef.current = false;
       });
   }, [currentUser, isReady, connect, joinRoom]);
@@ -60,7 +62,7 @@ export default function Workspace() {
 
   const handleLeave = () => {
     disconnect();
-    navigate("/");
+    navigate('/');
   };
 
   if (!currentUser) {
@@ -72,7 +74,7 @@ export default function Workspace() {
       <div
         ref={canvasRef}
         className="absolute inset-0"
-        style={{ cursor: "crosshair" }}
+        style={{ cursor: 'crosshair' }}
       />
 
       <div className="absolute top-4 left-4 z-10">
@@ -89,10 +91,10 @@ export default function Workspace() {
           <div className="font-semibold text-gray-900">{currentUser.name}</div>
           <div
             className={`text-xs ${
-              isConnected ? "text-green-600" : "text-red-600"
+              isConnected ? 'text-green-600' : 'text-red-600'
             }`}
           >
-            {isConnected ? "● Connected" : "● Disconnected"}
+            {isConnected ? '● Connected' : '● Disconnected'}
           </div>
           <div className="text-xs text-gray-600 mt-1">
             Users: {users ? users.size : 0}/20

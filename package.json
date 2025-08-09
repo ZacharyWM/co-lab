@@ -18,7 +18,10 @@
     "build:server": "cd server && bun run build",
     "start": "cd server && bun run start",
     "install:all": "bun install && cd client && bun install && cd ../server && bun install",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check"
   },
   "dependencies": {
     "concurrently": "^8.2.2",
@@ -35,6 +38,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "globals": "^15.0.0",
     "typescript": "^5.0.0",
-    "typescript-eslint": "^8.0.1"
+    "typescript-eslint": "^8.0.1",
+    "prettier": "^3.3.3"
   }
 }

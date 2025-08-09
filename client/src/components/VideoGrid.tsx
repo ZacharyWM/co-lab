@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
 type VideoItem = {
   userId: string;
@@ -38,7 +38,7 @@ function VideoTile({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if ("srcObject" in el) {
+    if ('srcObject' in el) {
       (el as any).srcObject = stream;
     } else {
       // @ts-expect-error Fallback for very old browsers without HTMLMediaElement.srcObject

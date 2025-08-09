@@ -1,4 +1,4 @@
-import { WebSocketMessage } from "../types";
+import { WebSocketMessage } from '../types';
 
 export type MessageHandler = (message: WebSocketMessage) => void;
 
@@ -12,7 +12,7 @@ export class SignalingService {
   private reconnectTimeoutId: NodeJS.Timeout | null = null;
   private connectionTimeoutId: NodeJS.Timeout | null = null;
 
-  constructor(private url: string = "ws://localhost:3001") {}
+  constructor(private url: string = 'ws://localhost:3001') {}
 
   connect(): Promise<void> {
     if (
@@ -20,7 +20,7 @@ export class SignalingService {
       (this.ws && this.ws.readyState === WebSocket.OPEN)
     ) {
       console.log(
-        "Already connected or connecting, skipping connection attempt"
+        'Already connected or connecting, skipping connection attempt'
       );
       return Promise.resolve();
     }
@@ -34,10 +34,10 @@ export class SignalingService {
 
         this.connectionTimeoutId = setTimeout(() => {
           if (this.ws && this.ws.readyState === WebSocket.CONNECTING) {
-            console.error("WebSocket connection timeout");
+            console.error('WebSocket connection timeout');
             this.ws.close();
             this.isConnecting = false;
-            reject(new Error("Connection timeout"));
+            reject(new Error('Connection timeout'));
           }
         }, 5000);
 
@@ -46,7 +46,7 @@ export class SignalingService {
             clearTimeout(this.connectionTimeoutId);
             this.connectionTimeoutId = null;
           }
-          console.log("WebSocket connected successfully");
+          console.log('WebSocket connected successfully');
           this.isConnecting = false;
           this.reconnectAttempts = 0;
           resolve();
@@ -57,7 +57,7 @@ export class SignalingService {
             const message: WebSocketMessage = JSON.parse(event.data);
             this.messageHandlers.forEach((handler) => handler(message));
           } catch (error) {
-            console.error("Failed to parse WebSocket message:", error);
+            console.error('Failed to parse WebSocket message:', error);
           }
         };
 
@@ -66,7 +66,7 @@ export class SignalingService {
             clearTimeout(this.connectionTimeoutId);
             this.connectionTimeoutId = null;
           }
-          console.log("WebSocket closed:", event.code, event.reason);
+          console.log('WebSocket closed:', event.code, event.reason);
           this.isConnecting = false;
           this.ws = null;
 
@@ -83,16 +83,16 @@ export class SignalingService {
             clearTimeout(this.connectionTimeoutId);
             this.connectionTimeoutId = null;
           }
-          console.error("WebSocket error:", error);
+          console.error('WebSocket error:', error);
           this.isConnecting = false;
 
           if (this.reconnectAttempts === 0) {
-            reject(new Error("Failed to connect to signaling server"));
+            reject(new Error('Failed to connect to signaling server'));
           }
         };
       } catch (error) {
         this.isConnecting = false;
-        console.error("Failed to create WebSocket:", error);
+        console.error('Failed to create WebSocket:', error);
         reject(error);
       }
     });
@@ -120,7 +120,7 @@ export class SignalingService {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
     } else {
-      console.warn("WebSocket not connected, message not sent:", message);
+      console.warn('WebSocket not connected, message not sent:', message);
     }
   }
 
@@ -158,7 +158,7 @@ export class SignalingService {
       ) {
         console.log(`Executing reconnection attempt ${this.reconnectAttempts}`);
         this.connect().catch((error) => {
-          console.error("Reconnection failed:", error);
+          console.error('Reconnection failed:', error);
         });
       }
     }, delay);
@@ -166,56 +166,56 @@ export class SignalingService {
 
   joinRoom(name: string) {
     this.send({
-      type: "join",
+      type: 'join',
       data: { name },
     });
   }
 
   leaveRoom() {
     this.send({
-      type: "leave",
+      type: 'leave',
       data: {},
     });
   }
 
   sendPosition(x: number, y: number) {
     this.send({
-      type: "position",
+      type: 'position',
       data: { x, y },
     });
   }
 
   sendZoneEnter(zoneName: string) {
     this.send({
-      type: "zone-enter",
+      type: 'zone-enter',
       data: { zoneName },
     });
   }
 
   sendZoneExit(zoneName: string) {
     this.send({
-      type: "zone-exit",
+      type: 'zone-exit',
       data: { zoneName },
     });
   }
 
   sendWebRTCOffer(targetUserId: string, offer: RTCSessionDescriptionInit) {
     this.send({
-      type: "offer",
+      type: 'offer',
       data: { targetUserId, offer },
     });
   }
 
   sendWebRTCAnswer(targetUserId: string, answer: RTCSessionDescriptionInit) {
     this.send({
-      type: "answer",
+      type: 'answer',
       data: { targetUserId, answer },
     });
   }
 
   sendWebRTCIceCandidate(targetUserId: string, candidate: RTCIceCandidateInit) {
     this.send({
-      type: "ice-candidate",
+      type: 'ice-candidate',
       data: { targetUserId, candidate },
     });
   }

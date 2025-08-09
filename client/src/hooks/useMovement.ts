@@ -1,5 +1,6 @@
-import { useEffect, useRef, useCallback } from "react";
-import { WORLD_WIDTH, WORLD_HEIGHT } from "./usePixi";
+import { useEffect, useRef, useCallback } from 'react';
+
+import { WORLD_WIDTH, WORLD_HEIGHT } from './usePixi';
 
 interface MovementState {
   keys: Set<string>;
@@ -50,10 +51,10 @@ export function useMovement(
     let deltaY = 0;
 
     // Check movement keys
-    if (state.keys.has("ArrowUp") || state.keys.has("KeyW")) deltaY -= 1;
-    if (state.keys.has("ArrowDown") || state.keys.has("KeyS")) deltaY += 1;
-    if (state.keys.has("ArrowLeft") || state.keys.has("KeyA")) deltaX -= 1;
-    if (state.keys.has("ArrowRight") || state.keys.has("KeyD")) deltaX += 1;
+    if (state.keys.has('ArrowUp') || state.keys.has('KeyW')) deltaY -= 1;
+    if (state.keys.has('ArrowDown') || state.keys.has('KeyS')) deltaY += 1;
+    if (state.keys.has('ArrowLeft') || state.keys.has('KeyA')) deltaX -= 1;
+    if (state.keys.has('ArrowRight') || state.keys.has('KeyD')) deltaX += 1;
 
     // Normalize diagonal movement
     if (deltaX !== 0 && deltaY !== 0) {
@@ -76,7 +77,7 @@ export function useMovement(
       // Throttled local broadcast for WebSocket layer
       if (now - lastBroadcastRef.current >= BROADCAST_INTERVAL_MS) {
         window.dispatchEvent(
-          new CustomEvent<{ x: number; y: number }>("local:position", {
+          new CustomEvent<{ x: number; y: number }>('local:position', {
             detail: { x: clampedPosition.x, y: clampedPosition.y },
           })
         );
@@ -92,7 +93,7 @@ export function useMovement(
       onStop?.();
       // Final position broadcast on stop
       window.dispatchEvent(
-        new CustomEvent<{ x: number; y: number }>("local:position", {
+        new CustomEvent<{ x: number; y: number }>('local:position', {
           detail: { x: positionRef.current.x, y: positionRef.current.y },
         })
       );
@@ -105,14 +106,14 @@ export function useMovement(
     const key = event.code;
     if (
       [
-        "ArrowUp",
-        "ArrowDown",
-        "ArrowLeft",
-        "ArrowRight",
-        "KeyW",
-        "KeyA",
-        "KeyS",
-        "KeyD",
+        'ArrowUp',
+        'ArrowDown',
+        'ArrowLeft',
+        'ArrowRight',
+        'KeyW',
+        'KeyA',
+        'KeyS',
+        'KeyD',
       ].includes(key)
     ) {
       event.preventDefault();
@@ -124,14 +125,14 @@ export function useMovement(
     const key = event.code;
     if (
       [
-        "ArrowUp",
-        "ArrowDown",
-        "ArrowLeft",
-        "ArrowRight",
-        "KeyW",
-        "KeyA",
-        "KeyS",
-        "KeyD",
+        'ArrowUp',
+        'ArrowDown',
+        'ArrowLeft',
+        'ArrowRight',
+        'KeyW',
+        'KeyA',
+        'KeyS',
+        'KeyD',
       ].includes(key)
     ) {
       event.preventDefault();
@@ -146,7 +147,7 @@ export function useMovement(
       onPositionChange?.(clampedPosition.x, clampedPosition.y);
       // Broadcast programmatic position updates too
       window.dispatchEvent(
-        new CustomEvent<{ x: number; y: number }>("local:position", {
+        new CustomEvent<{ x: number; y: number }>('local:position', {
           detail: { x: clampedPosition.x, y: clampedPosition.y },
         })
       );
@@ -159,15 +160,15 @@ export function useMovement(
   }, []);
 
   useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
 
     // Start animation loop
     animationFrameRef.current = requestAnimationFrame(updatePosition);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
 
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
@@ -185,8 +186,8 @@ export function useMovement(
       }
     };
 
-    window.addEventListener("blur", handleBlur);
-    return () => window.removeEventListener("blur", handleBlur);
+    window.addEventListener('blur', handleBlur);
+    return () => window.removeEventListener('blur', handleBlur);
   }, [onStop]);
 
   return {

@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useAppContext } from "./useAppContext";
-import { useWebSocket } from "./useWebSocket";
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import { useAppContext } from './useAppContext';
+import { useWebSocket } from './useWebSocket';
 
 type RemoteStreamsMap = Map<string, MediaStream>;
 
@@ -8,8 +9,8 @@ const RTC_CONFIG: RTCConfiguration = {
   iceServers: [
     {
       urls: [
-        "stun:stun.l.google.com:19302",
-        "stun:global.stun.twilio.com:3478",
+        'stun:stun.l.google.com:19302',
+        'stun:global.stun.twilio.com:3478',
       ],
     },
   ],
@@ -83,8 +84,8 @@ export function useWebRTC(currentZone: ZoneName) {
       setError(null);
       return stream;
     } catch (e: any) {
-      console.error("getUserMedia error:", e);
-      setError(e?.message || "Failed to acquire media");
+      console.error('getUserMedia error:', e);
+      setError(e?.message || 'Failed to acquire media');
       setLocalStream(null);
       return null;
     }
@@ -99,7 +100,7 @@ export function useWebRTC(currentZone: ZoneName) {
         pc.onconnectionstatechange = null;
         pc.close();
       } catch (error) {
-        console.error("Error closing peer connection:", error);
+        console.error('Error closing peer connection:', error);
       }
       peersRef.current.delete(peerId);
     }
@@ -127,7 +128,7 @@ export function useWebRTC(currentZone: ZoneName) {
           try {
             pc!.addTrack(track, localStream);
           } catch (error) {
-            console.error("Error adding track to peer connection:", error);
+            console.error('Error adding track to peer connection:', error);
           }
         });
       }
@@ -154,7 +155,7 @@ export function useWebRTC(currentZone: ZoneName) {
 
       pc.onicecandidate = (e) => {
         if (e.candidate) {
-          send("ice-candidate", {
+          send('ice-candidate', {
             targetUserId: peerId,
             candidate: e.candidate,
           });
@@ -163,7 +164,7 @@ export function useWebRTC(currentZone: ZoneName) {
 
       pc.onconnectionstatechange = () => {
         const st = pc!.connectionState;
-        if (st === "failed" || st === "disconnected" || st === "closed") {
+        if (st === 'failed' || st === 'disconnected' || st === 'closed') {
           closePeer(peerId);
         }
       };
@@ -183,13 +184,13 @@ export function useWebRTC(currentZone: ZoneName) {
           offerToReceiveVideo: true,
         });
         await pc.setLocalDescription(offer);
-        send("offer", {
+        send('offer', {
           targetUserId: peerId,
           sdp: offer.sdp,
           type: offer.type,
         });
       } catch (e) {
-        console.error("Failed to create/send offer:", e);
+        console.error('Failed to create/send offer:', e);
       }
     },
     [createPeer, send]
@@ -202,13 +203,13 @@ export function useWebRTC(currentZone: ZoneName) {
         await pc.setRemoteDescription({ sdp, type });
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
-        send("answer", {
+        send('answer', {
           targetUserId: fromUserId,
           sdp: answer.sdp,
           type: answer.type,
         });
       } catch (e) {
-        console.error("Failed to handle offer:", e);
+        console.error('Failed to handle offer:', e);
       }
     },
     [createPeer, send]
@@ -221,7 +222,7 @@ export function useWebRTC(currentZone: ZoneName) {
       try {
         await pc.setRemoteDescription({ sdp, type });
       } catch (e) {
-        console.error("Failed to handle answer:", e);
+        console.error('Failed to handle answer:', e);
       }
     },
     []
@@ -234,7 +235,7 @@ export function useWebRTC(currentZone: ZoneName) {
       try {
         await pc.addIceCandidate(candidate);
       } catch (e) {
-        console.error("Failed to add ICE candidate:", e);
+        console.error('Failed to add ICE candidate:', e);
       }
     },
     []
@@ -329,22 +330,22 @@ export function useWebRTC(currentZone: ZoneName) {
       reconcilePeers();
     };
 
-    on("offer", onOffer);
-    on("answer", onAnswer);
-    on("ice-candidate", onIce);
-    on("user-left", onUserLeft);
-    on("zone-enter", onZoneEnter);
-    on("zone-exit", onZoneExit);
-    on("joined", onJoined);
+    on('offer', onOffer);
+    on('answer', onAnswer);
+    on('ice-candidate', onIce);
+    on('user-left', onUserLeft);
+    on('zone-enter', onZoneEnter);
+    on('zone-exit', onZoneExit);
+    on('joined', onJoined);
 
     return () => {
-      off("offer", onOffer);
-      off("answer", onAnswer);
-      off("ice-candidate", onIce);
-      off("user-left", onUserLeft);
-      off("zone-enter", onZoneEnter);
-      off("zone-exit", onZoneExit);
-      off("joined", onJoined);
+      off('offer', onOffer);
+      off('answer', onAnswer);
+      off('ice-candidate', onIce);
+      off('user-left', onUserLeft);
+      off('zone-enter', onZoneEnter);
+      off('zone-exit', onZoneExit);
+      off('joined', onJoined);
     };
   }, [
     on,
@@ -364,21 +365,21 @@ export function useWebRTC(currentZone: ZoneName) {
     const stream = await ensureLocalMedia();
 
     for (const pc of peersRef.current.values()) {
-      const senders = pc.getSenders().filter((s) => s.track?.kind === "audio");
+      const senders = pc.getSenders().filter((s) => s.track?.kind === 'audio');
       const track = (stream ?? localStream)?.getAudioTracks()[0];
       if (track) track.enabled = next;
       if (senders.length === 0 && next && track && stream) {
         try {
           pc.addTrack(track, stream);
         } catch (error) {
-          console.error("Error adding track to peer connection:", error);
+          console.error('Error adding track to peer connection:', error);
         }
       } else if (!next) {
         for (const s of senders) {
           try {
             pc.removeTrack(s);
           } catch (error) {
-            console.error("Error removing track from peer connection:", error);
+            console.error('Error removing track from peer connection:', error);
           }
         }
       }
@@ -391,21 +392,21 @@ export function useWebRTC(currentZone: ZoneName) {
     const stream = await ensureLocalMedia();
 
     for (const pc of peersRef.current.values()) {
-      const senders = pc.getSenders().filter((s) => s.track?.kind === "video");
+      const senders = pc.getSenders().filter((s) => s.track?.kind === 'video');
       const track = (stream ?? localStream)?.getVideoTracks()[0];
       if (track) track.enabled = next;
       if (senders.length === 0 && next && track && stream) {
         try {
           pc.addTrack(track, stream);
         } catch (error) {
-          console.error("Error adding track to peer connection:", error);
+          console.error('Error adding track to peer connection:', error);
         }
       } else if (!next) {
         for (const s of senders) {
           try {
             pc.removeTrack(s);
           } catch (error) {
-            console.error("Error removing track from peer connection:", error);
+            console.error('Error removing track from peer connection:', error);
           }
         }
       }

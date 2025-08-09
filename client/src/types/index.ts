@@ -15,17 +15,17 @@ export interface AppState {
 
 export interface WebSocketMessage {
   type:
-    | "connection"
-    | "joined"
-    | "user-joined"
-    | "user-left"
-    | "position-update"
-    | "zone-enter"
-    | "zone-exit"
-    | "offer"
-    | "answer"
-    | "ice-candidate"
-    | "error";
+    | 'connection'
+    | 'joined'
+    | 'user-joined'
+    | 'user-left'
+    | 'position-update'
+    | 'zone-enter'
+    | 'zone-exit'
+    | 'offer'
+    | 'answer'
+    | 'ice-candidate'
+    | 'error';
   data: any;
 }
 

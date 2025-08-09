@@ -8,7 +8,7 @@ export class RoomManager {
     const room: Room = {
       id: roomId,
       users: new Map(),
-      maxUsers
+      maxUsers,
     };
     this.rooms.set(roomId, room);
     return room;
@@ -24,7 +24,7 @@ export class RoomManager {
 
   addUserToRoom(roomId: string, user: User): boolean {
     const room = this.getOrCreateRoom(roomId);
-    
+
     if (room.users.size >= room.maxUsers) {
       return false;
     }
@@ -96,6 +96,8 @@ export class RoomManager {
     const room = this.rooms.get(roomId);
     if (!room) return [];
 
-    return Array.from(room.users.values()).filter(user => user.zone === zoneName);
+    return Array.from(room.users.values()).filter(
+      (user) => user.zone === zoneName
+    );
   }
 }
