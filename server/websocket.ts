@@ -1,6 +1,12 @@
 import { ServerWebSocket } from "bun";
-import { RoomManager } from './room';
-import { WebSocketMessage, JoinMessage, PositionMessage, WebRTCMessage, ZoneMessage } from './types';
+import { RoomManager } from "./room";
+import {
+  WebSocketMessage,
+  JoinMessage,
+  PositionMessage,
+  WebRTCMessage,
+  ZoneMessage,
+} from "./types";
 
 export class WebSocketHandler {
   private roomManager: RoomManager;
@@ -15,10 +21,12 @@ export class WebSocketHandler {
     ws.data = { userId };
     this.connections.set(userId, ws);
 
-    ws.send(JSON.stringify({
-      type: 'connection',
-      data: { userId }
-    }));
+    ws.send(
+      JSON.stringify({
+        type: "connection",
+        data: { userId },
+      })
+    );
   }
 
   handleMessage(ws: ServerWebSocket<any>, message: string) {
@@ -27,34 +35,35 @@ export class WebSocketHandler {
       const userId = ws.data.userId;
 
       if (!this.isValidMessage(parsedMessage)) {
-        this.sendError(ws, 'Invalid message format');
+        this.sendError(ws, "Invalid message format");
         return;
       }
 
       switch (parsedMessage.type) {
-        case 'join':
+        case "join":
           this.handleJoin(ws, userId, parsedMessage.data as JoinMessage);
           break;
-        case 'leave':
+        case "leave":
           this.handleLeave(userId);
           break;
-        case 'position':
+        case "position":
           this.handlePosition(userId, parsedMessage.data as PositionMessage);
           break;
-        case 'offer':
-        case 'answer':
-        case 'ice-candidate':
+        case "offer":
+        case "answer":
+        case "ice-candidate":
           this.handleWebRTC(userId, parsedMessage);
           break;
-        case 'zone-enter':
-        case 'zone-exit':
+        case "zone-enter":
+        case "zone-exit":
           this.handleZoneChange(userId, parsedMessage);
           break;
         default:
-          this.sendError(ws, 'Unknown message type');
+          this.sendError(ws, "Unknown message type");
       }
     } catch (error) {
-      this.sendError(ws, 'Failed to parse message');
+      console.log("Error parsing message:", error);
+      this.sendError(ws, "Failed to parse message");
     }
   }
 
@@ -66,56 +75,70 @@ export class WebSocketHandler {
     }
   }
 
-  private handleJoin(ws: ServerWebSocket<any>, userId: string, data: JoinMessage) {
-    if (!data.name || typeof data.name !== 'string' || !this.isValidName(data.name)) {
-      this.sendError(ws, 'Invalid name');
+  private handleJoin(
+    ws: ServerWebSocket<any>,
+    userId: string,
+    data: JoinMessage
+  ) {
+    if (
+      !data.name ||
+      typeof data.name !== "string" ||
+      !this.isValidName(data.name)
+    ) {
+      this.sendError(ws, "Invalid name");
       return;
     }
 
-    const roomId = 'main'; // For now, everyone joins the main room
+    const roomId = "main"; // For now, everyone joins the main room
     const user = {
       id: userId,
       name: data.name.trim(),
       x: 100,
-      y: 100
+      y: 100,
     };
 
     const success = this.roomManager.addUserToRoom(roomId, user);
     if (!success) {
-      this.sendError(ws, 'Room is full');
+      this.sendError(ws, "Room is full");
       return;
     }
 
     // Send success response to joining user
-    ws.send(JSON.stringify({
-      type: 'joined',
-      data: {
-        userId,
-        room: roomId,
-        users: this.roomManager.getRoomUsers(roomId)
-      }
-    }));
+    ws.send(
+      JSON.stringify({
+        type: "joined",
+        data: {
+          userId,
+          room: roomId,
+          users: this.roomManager.getRoomUsers(roomId),
+        },
+      })
+    );
 
     // Broadcast to other users in room
-    this.broadcastToRoom(roomId, {
-      type: 'user-joined',
-      data: user
-    }, userId);
+    this.broadcastToRoom(
+      roomId,
+      {
+        type: "user-joined",
+        data: user,
+      },
+      userId
+    );
   }
 
   private handleLeave(userId: string) {
     const user = this.roomManager.removeUserFromRoom(userId);
     if (user) {
-      const roomId = 'main';
+      const roomId = "main";
       this.broadcastToRoom(roomId, {
-        type: 'user-left',
-        data: { userId }
+        type: "user-left",
+        data: { userId },
       });
     }
   }
 
   private handlePosition(userId: string, data: PositionMessage) {
-    if (typeof data.x !== 'number' || typeof data.y !== 'number') {
+    if (typeof data.x !== "number" || typeof data.y !== "number") {
       return;
     }
 
@@ -123,14 +146,18 @@ export class WebSocketHandler {
     if (user) {
       const roomId = this.roomManager.getUserRoom(userId);
       if (roomId) {
-        this.broadcastToRoom(roomId, {
-          type: 'position-update',
-          data: {
-            userId,
-            x: data.x,
-            y: data.y
-          }
-        }, userId);
+        this.broadcastToRoom(
+          roomId,
+          {
+            type: "position-update",
+            data: {
+              userId,
+              x: data.x,
+              y: data.y,
+            },
+          },
+          userId
+        );
       }
     }
   }
@@ -143,19 +170,21 @@ export class WebSocketHandler {
 
     const targetWs = this.connections.get(data.targetUserId);
     if (targetWs) {
-      targetWs.send(JSON.stringify({
-        type: message.type,
-        data: {
-          ...data,
-          fromUserId: userId
-        }
-      }));
+      targetWs.send(
+        JSON.stringify({
+          type: message.type,
+          data: {
+            ...data,
+            fromUserId: userId,
+          },
+        })
+      );
     }
   }
 
   private handleZoneChange(userId: string, message: WebSocketMessage) {
     const data = message.data as ZoneMessage;
-    if (!data.zoneName || typeof data.zoneName !== 'string') {
+    if (!data.zoneName || typeof data.zoneName !== "string") {
       return;
     }
 
@@ -163,20 +192,28 @@ export class WebSocketHandler {
     if (user) {
       const roomId = this.roomManager.getUserRoom(userId);
       if (roomId) {
-        this.broadcastToRoom(roomId, {
-          type: message.type,
-          data: {
-            userId,
-            zoneName: data.zoneName
-          }
-        }, userId);
+        this.broadcastToRoom(
+          roomId,
+          {
+            type: message.type,
+            data: {
+              userId,
+              zoneName: data.zoneName,
+            },
+          },
+          userId
+        );
       }
     }
   }
 
-  private broadcastToRoom(roomId: string, message: any, excludeUserId?: string) {
+  private broadcastToRoom(
+    roomId: string,
+    message: any,
+    excludeUserId?: string
+  ) {
     const users = this.roomManager.getRoomUsers(roomId);
-    users.forEach(user => {
+    users.forEach((user) => {
       if (user.id !== excludeUserId) {
         const ws = this.connections.get(user.id);
         if (ws) {
@@ -187,10 +224,12 @@ export class WebSocketHandler {
   }
 
   private sendError(ws: ServerWebSocket<any>, error: string) {
-    ws.send(JSON.stringify({
-      type: 'error',
-      data: { message: error }
-    }));
+    ws.send(
+      JSON.stringify({
+        type: "error",
+        data: { message: error },
+      })
+    );
   }
 
   private generateUserId(): string {
@@ -198,7 +237,9 @@ export class WebSocketHandler {
   }
 
   private isValidMessage(message: any): message is WebSocketMessage {
-    return message && typeof message.type === 'string' && message.data !== undefined;
+    return (
+      message && typeof message.type === "string" && message.data !== undefined
+    );
   }
 
   private isValidName(name: string): boolean {

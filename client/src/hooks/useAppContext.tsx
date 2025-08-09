@@ -36,23 +36,25 @@ function appReducer(state: AppState, action: AppAction): AppState {
         currentUser: action.payload,
       };
 
-    case "ADD_USER":
+    case "ADD_USER": {
       const newUsers = new Map(state.users);
       newUsers.set(action.payload.id, action.payload);
       return {
         ...state,
         users: newUsers,
       };
+    }
 
-    case "REMOVE_USER":
+    case "REMOVE_USER": {
       const updatedUsers = new Map(state.users);
       updatedUsers.delete(action.payload);
       return {
         ...state,
         users: updatedUsers,
       };
+    }
 
-    case "UPDATE_USER":
+    case "UPDATE_USER": {
       const usersToUpdate = new Map(state.users);
       const existingUser = usersToUpdate.get(action.payload.userId);
       if (existingUser) {
@@ -65,6 +67,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         users: usersToUpdate,
       };
+    }
 
     case "SET_CONNECTION_STATUS":
       return {

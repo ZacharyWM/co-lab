@@ -13,7 +13,15 @@ export interface Room {
 }
 
 export interface WebSocketMessage {
-  type: 'join' | 'leave' | 'position' | 'offer' | 'answer' | 'ice-candidate' | 'zone-enter' | 'zone-exit';
+  type:
+    | "join"
+    | "leave"
+    | "position"
+    | "offer"
+    | "answer"
+    | "ice-candidate"
+    | "zone-enter"
+    | "zone-exit";
   data: any;
   userId?: string;
   targetUserId?: string;

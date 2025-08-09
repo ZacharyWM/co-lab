@@ -98,7 +98,9 @@ export function useWebRTC(currentZone: ZoneName) {
         pc.onicecandidate = null;
         pc.onconnectionstatechange = null;
         pc.close();
-      } catch {}
+      } catch (error) {
+        console.error("Error closing peer connection:", error);
+      }
       peersRef.current.delete(peerId);
     }
     const stream = remoteStreamsRef.current.get(peerId);
@@ -124,7 +126,9 @@ export function useWebRTC(currentZone: ZoneName) {
         localStream.getTracks().forEach((track) => {
           try {
             pc!.addTrack(track, localStream);
-          } catch {}
+          } catch (error) {
+            console.error("Error adding track to peer connection:", error);
+          }
         });
       }
 
@@ -366,12 +370,16 @@ export function useWebRTC(currentZone: ZoneName) {
       if (senders.length === 0 && next && track && stream) {
         try {
           pc.addTrack(track, stream);
-        } catch {}
+        } catch (error) {
+          console.error("Error adding track to peer connection:", error);
+        }
       } else if (!next) {
         for (const s of senders) {
           try {
             pc.removeTrack(s);
-          } catch {}
+          } catch (error) {
+            console.error("Error removing track from peer connection:", error);
+          }
         }
       }
     }
@@ -389,12 +397,16 @@ export function useWebRTC(currentZone: ZoneName) {
       if (senders.length === 0 && next && track && stream) {
         try {
           pc.addTrack(track, stream);
-        } catch {}
+        } catch (error) {
+          console.error("Error adding track to peer connection:", error);
+        }
       } else if (!next) {
         for (const s of senders) {
           try {
             pc.removeTrack(s);
-          } catch {}
+          } catch (error) {
+            console.error("Error removing track from peer connection:", error);
+          }
         }
       }
     }

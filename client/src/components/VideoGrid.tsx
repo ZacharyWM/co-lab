@@ -41,7 +41,7 @@ function VideoTile({
     if ("srcObject" in el) {
       (el as any).srcObject = stream;
     } else {
-      // @ts-ignore
+      // @ts-expect-error Fallback for very old browsers without HTMLMediaElement.srcObject
       el.src = URL.createObjectURL(stream);
     }
   }, [stream]);
